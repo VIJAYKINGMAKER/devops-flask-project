@@ -1,4 +1,3 @@
-
 name: CI Pipeline
 
 on: [push, pull_request]
@@ -33,10 +32,29 @@ jobs:
       - name: Build Docker image
         run: docker build -f dockerfile -t devops-flask-project:latest .
 
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for security scanning
+        run: docker build -f dockerfile -t devops-flask-project:scan .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: devops-flask-project:scan
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: [test, docker-build]
+    needs: [test, docker-build, security-scan]
     permissions:
       contents: read
       packages: write
@@ -66,4 +84,4 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.name }}:latest
-            ${{ steps.image.outputs.name }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:${{ github.sha}}
