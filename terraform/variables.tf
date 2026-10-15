@@ -45,3 +45,15 @@ variable "availability_zone" {
   type        = string
   default     = "us-east-1a"
 }
+
+variable "instance_type" {
+  description = "EC2 instance type for the Flask application"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "allowed_ssh_cidr" {
+  description = "Single trusted public IPv4 address in CIDR notation for SSH; leave empty to disable SSH"
+  type        = string
+  default     = ""
+}
