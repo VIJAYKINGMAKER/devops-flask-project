@@ -1,8 +1,7 @@
-
 resource "aws_instance" "app" {
-  ami                         = data.aws_ami.amazon_linux.id
+  ami                         = var.ami_id
   instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.public.id
+  subnet_id                   = aws_subnet.private.id
   vpc_security_group_ids      = [aws_security_group.app.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2_app.name
   associate_public_ip_address = false
@@ -11,10 +10,23 @@ resource "aws_instance" "app" {
     #!/bin/bash
     set -euxo pipefail
 
-    dnf install -y docker
+   # Docker and AWS CLI must already be installed in the AMI.
     systemctl enable --now docker
 
-    docker --version
+    AWS_REGION="${var.aws_region}"
+    ECR_REPOSITORY="${aws_ecr_repository.app.repository_url}"
+    IMAGE="$ECR_REPOSITORY:main"
+
+    aws ecr get-login-password --region "$AWS_REGION" \
+      | docker login --username AWS --password-stdin "$ECR_REPOSITORY"
+
+    docker pull "$IMAGE"
+
+    docker run -d \
+      --name devops-flask-project \
+      --restart unless-stopped \
+      -p 5000:5000 \
+      "$IMAGE"
   EOF
 
   user_data_replace_on_change = true
@@ -22,24 +34,4 @@ resource "aws_instance" "app" {
   tags = merge(local.common_tags, {
     Name = "${local.project_name}-${local.environment}-app"
   })
-}
-
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
 }
