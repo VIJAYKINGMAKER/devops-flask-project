@@ -57,3 +57,17 @@ variable "allowed_ssh_cidr" {
   type        = string
   default     = ""
 }
+variable "availability_zone_2" {
+  description = "Second Availability Zone for the public load balancer"
+  type        = string
+  default     = "us-east-1b"
+}
+variable "acm_certificate_arn" {
+  description = "ARN of the ACM certificate for HTTPS on the ALB"
+  type        = string
+}
+variable "ami_id" {
+  description = "Prebuilt Amazon Linux AMI ID with Docker and AWS CLI installed"
+  type        = string
+  default     = ""
+}
