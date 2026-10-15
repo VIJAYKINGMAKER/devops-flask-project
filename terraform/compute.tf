@@ -9,9 +9,12 @@ resource "aws_instance" "app" {
 
   user_data = <<-EOF
     #!/bin/bash
-    set -eux
+    set -euxo pipefail
+
     dnf install -y docker
     systemctl enable --now docker
+
+    docker --version
   EOF
 
   user_data_replace_on_change = true
