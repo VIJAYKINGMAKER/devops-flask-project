@@ -1,3 +1,4 @@
+
 resource "aws_instance" "app" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
@@ -10,7 +11,7 @@ resource "aws_instance" "app" {
     #!/bin/bash
     set -euxo pipefail
 
-   # Docker and AWS CLI must already be installed in the AMI.
+    # Docker and AWS CLI must already be installed in the AMI.
     systemctl enable --now docker
 
     AWS_REGION="${var.aws_region}"
@@ -30,6 +31,13 @@ resource "aws_instance" "app" {
   EOF
 
   user_data_replace_on_change = true
+
+  depends_on = [
+    aws_iam_role_policy.ecr_pull,
+    aws_vpc_endpoint.ecr_api,
+    aws_vpc_endpoint.ecr_dkr,
+    aws_vpc_endpoint.s3
+  ]
 
   tags = merge(local.common_tags, {
     Name = "${local.project_name}-${local.environment}-app"
