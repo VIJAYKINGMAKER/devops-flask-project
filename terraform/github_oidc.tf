@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:VIJAYKINGMAKER/devops-flask-project:ref:refs/heads/main"]
+      values   = ["repo:VIJAYKINGMAKER@183483856/devops-flask-project@1418270557:ref:refs/heads/main"]
     }
   }
 }
