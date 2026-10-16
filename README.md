@@ -216,3 +216,7 @@ Code → GitHub → GitHub Actions → Automated Tests → ✅ Successful Build
 ### 4. GitHub Repository
 
 ![GitHub Repository](screenshots/github-repository.png)
+
+
+## Container Registry
+Docker images are published to Amazon ECR through GitHub Actions using OIDC authentication.
