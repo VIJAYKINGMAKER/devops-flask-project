@@ -122,8 +122,7 @@ jobs:
               f"sudo docker pull {image}",
               "sudo docker rm -f devops-flask-project || true",
               f"sudo docker run -d --name devops-flask-project --restart unless-stopped -p 5000:5000 {image}",
-              "curl --fail --silent --show-error --retry 10 --retry-delay 3 http://127.0.0.1:5000/health",
-          ]
+              "for i in $(seq 1 30); do if curl --fail --silent http://127.0.0.1:5000/health; then exit 0; fi; sleep 2; done; sudo docker logs --tail 50 devops-flask-project; exit 1",
 
           result = subprocess.run(
               [
